@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Flora Hamilton">
+
+<title>hvforest</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="hvforest_soil_respir_files/libs/clipboard/clipboard.min.js"></script>
+<script src="hvforest_soil_respir_files/libs/quarto-html/quarto.js"></script>
+<script src="hvforest_soil_respir_files/libs/quarto-html/popper.min.js"></script>
+<script src="hvforest_soil_respir_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="hvforest_soil_respir_files/libs/quarto-html/anchor.min.js"></script>
+<link href="hvforest_soil_respir_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="hvforest_soil_respir_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="hvforest_soil_respir_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="hvforest_soil_respir_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="hvforest_soil_respir_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">hvforest</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Flora Hamilton </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="question-does-temperature-impact-soil-respiration-rates" class="level1">
+<h1>Question: “Does temperature impact soil respiration rates?”</h1>
+<p>To answer this question, I will be looking at testing data from the Harvard Forest LTER’s <em>20-Year Synthesis of Soil Respiration Data at Harvard Forest 1991-2008.</em> I will be conducting a statistical analysis comparing the soil respiration rates of a temperature-treated plot and a control plot where no temperature is applied, a test which simulates global warming conditions.</p>
+<p>The data set is downloadable and the methodology described from the following locations:</p>
+<ul>
+<li><p>EDI: <a href="https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-hfr.194.10" class="uri">https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-hfr.194.10</a></p></li>
+<li><p>Harvard Forest LTER: https://harvardforest1.fas.harvard.edu/exist/apps/datasets/showData.html?id=hf018</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.3     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stats)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(feasts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: fabletools</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tsibble)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'tsibble'
+
+The following object is masked from 'package:lubridate':
+
+    interval
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo </code></pre>
+</div>
+</div>
+<section id="reading-in-and-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="reading-in-and-cleaning">Reading in and cleaning</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Package ID: knb-lter-hfr.194.10 Cataloging System:https://pasta.edirepository.org.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Data set title: 20-Year Synthesis of Soil Respiration Data at Harvard Forest 1991-2008.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Data set creator:  Eric Davidson -  Aaron Ellison -  Adrien Finzi -  Julian Hadley -   Jerry Melillo -   William Munger -    Scott Ollinger -   Jim Tang -    Ruth Varner -  </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Contact:    - Information Manager Harvard Forest  - hf-im@lists.fas.harvard.edu</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Stylesheet v2.11 for metadata conversion into program: John H. Porter, Univ. Virginia, jporter@virginia.edu </span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Reading in data </span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>inUrl1  <span class="ot">&lt;-</span> <span class="st">"https://pasta.lternet.edu/package/data/eml/knb-lter-hfr/194/10/0a9a62378dac53ae0fdd6afd0b8d344e"</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>infile1 <span class="ot">&lt;-</span> <span class="fu">tempfile</span>()</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">download.file</span>(inUrl1,infile1,<span class="at">method=</span><span class="st">"curl"</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.na</span>(<span class="fu">file.size</span>(infile1))) <span class="fu">download.file</span>(inUrl1,infile1,<span class="at">method=</span><span class="st">"auto"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                   </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a> dt1 <span class="ot">&lt;-</span><span class="fu">read.csv</span>(infile1,<span class="at">header=</span>F </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>          ,<span class="at">skip=</span><span class="dv">1</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            ,<span class="at">sep=</span><span class="st">","</span>  </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        , <span class="at">col.names=</span><span class="fu">c</span>(</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"date"</span>,     </span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"year"</span>,     </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"doy"</span>,     </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"time"</span>,     </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"pi"</span>,     </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"site"</span>,     </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"x.spmnad83"</span>,     </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"y.spmnad83"</span>,     </span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"elevation"</span>,     </span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"block"</span>,     </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"plot"</span>,     </span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"distance"</span>,     </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"transect"</span>,     </span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"site.desc"</span>,     </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"soil.series"</span>,     </span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"soil.drainage.class"</span>,     </span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"obs.exp"</span>,     </span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"treat.level"</span>,     </span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"replicate"</span>,     </span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"auto.manual"</span>,     </span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"collar"</span>,     </span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"tsoil.1"</span>,     </span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"tsoil.1.depth"</span>,     </span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"tsoil.2"</span>,     </span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"tsoil.2.depth"</span>,     </span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"co2.flux"</span>,     </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"range.min"</span>,     </span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"range.mean"</span>,     </span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"range.max"</span>,     </span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"x.cutoff"</span>,     </span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"mean.slope"</span>,     </span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"stdev.slope"</span>,     </span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"n.pts"</span>,     </span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"flag.stdev"</span>,     </span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"collar.height"</span>,     </span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"subplot"</span>,     </span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"subplot.t"</span>,     </span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"notes"</span>    ), <span class="at">check.names=</span><span class="cn">TRUE</span>)</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="fu">unlink</span>(infile1)</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>                                                   </span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="co"># attempting to convert dt1$date dateTime string to R date structure (date or POSIXct)                                </span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>tmpDateFormat<span class="ot">&lt;-</span><span class="st">"%Y-%m-%d"</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>tmp1date<span class="ot">&lt;-</span><span class="fu">as.Date</span>(dt1<span class="sc">$</span>date,<span class="at">format=</span>tmpDateFormat)</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep the new dates only if they all converted correctly</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(tmp1date) <span class="sc">==</span> <span class="fu">length</span>(tmp1date[<span class="sc">!</span><span class="fu">is.na</span>(tmp1date)])){dt1<span class="sc">$</span>date <span class="ot">&lt;-</span> tmp1date } <span class="cf">else</span> {<span class="fu">print</span>(<span class="st">"Date conversion failed for dt1$date. Please inspect the data and do the date conversion yourself."</span>)}                                                                    </span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmpDateFormat,tmp1date) </span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>doy)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>doy <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>doy))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>doy) ]               </span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>doy)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>doy <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>doy)</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>pi)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>pi<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>pi)</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>site)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>site<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>site)</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>x.spmnad83)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>x.spmnad83 <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>x.spmnad83))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>x.spmnad83) ]               </span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>x.spmnad83)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>x.spmnad83 <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>x.spmnad83)</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>y.spmnad83)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>y.spmnad83 <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>y.spmnad83))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>y.spmnad83) ]               </span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>y.spmnad83)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>y.spmnad83 <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>y.spmnad83)</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>elevation)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>elevation <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>elevation))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>elevation) ]               </span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>elevation)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>elevation <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>elevation)</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>block)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>block<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>block)</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>plot)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>plot<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>plot)</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>distance)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>distance <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>distance))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>distance) ]               </span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>distance)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>distance <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>distance)</span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>transect)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>transect <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>transect))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>transect) ]               </span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>transect)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>transect <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>transect)</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>site.desc)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>site.desc<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>site.desc)</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>soil.series)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>soil.series<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>soil.series)</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>soil.drainage.class)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>soil.drainage.class<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>soil.drainage.class)</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>obs.exp)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>obs.exp<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>obs.exp)</span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>treat.level)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>treat.level<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>treat.level)</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>replicate)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>replicate<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>replicate)</span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>auto.manual)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>auto.manual<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>auto.manual)</span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>collar)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>collar<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>collar)</span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.1</span>)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>tsoil<span class="fl">.1</span> <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.1</span>))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.1</span>) ]               </span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.1</span>)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>tsoil<span class="fl">.1</span> <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.1</span>)</span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth) ]               </span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">1.</span>depth)</span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.2</span>)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>tsoil<span class="fl">.2</span> <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.2</span>))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.2</span>) ]               </span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.2</span>)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>tsoil<span class="fl">.2</span> <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>tsoil<span class="fl">.2</span>)</span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth) ]               </span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>tsoil.<span class="fl">2.</span>depth)</span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>co2.flux)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>co2.flux <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>co2.flux))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>co2.flux) ]               </span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>co2.flux)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>co2.flux <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>co2.flux)</span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.min)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>range.min <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>range.min))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>range.min) ]               </span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.min)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>range.min <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>range.min)</span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.mean)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>range.mean <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>range.mean))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>range.mean) ]               </span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.mean)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>range.mean <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>range.mean)</span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.max)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>range.max <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>range.max))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>range.max) ]               </span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>range.max)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>range.max <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>range.max)</span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>x.cutoff)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>x.cutoff <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>x.cutoff))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>x.cutoff) ]               </span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>x.cutoff)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>x.cutoff <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>x.cutoff)</span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>mean.slope)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>mean.slope <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>mean.slope))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>mean.slope) ]               </span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>mean.slope)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>mean.slope <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>mean.slope)</span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>stdev.slope)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>stdev.slope <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>stdev.slope))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>stdev.slope) ]               </span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>stdev.slope)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>stdev.slope <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>stdev.slope)</span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>n.pts)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>n.pts <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>n.pts))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>n.pts) ]               </span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>n.pts)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>n.pts <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>n.pts)</span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>flag.stdev)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>flag.stdev<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>flag.stdev)</span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>collar.height)<span class="sc">==</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>collar.height <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(<span class="fu">levels</span>(dt1<span class="sc">$</span>collar.height))[<span class="fu">as.integer</span>(dt1<span class="sc">$</span>collar.height) ]               </span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>collar.height)<span class="sc">==</span><span class="st">"character"</span>) dt1<span class="sc">$</span>collar.height <span class="ot">&lt;-</span><span class="fu">as.numeric</span>(dt1<span class="sc">$</span>collar.height)</span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>subplot)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>subplot<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>subplot)</span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>subplot.t)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>subplot.t<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>subplot.t)</span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">class</span>(dt1<span class="sc">$</span>notes)<span class="sc">!=</span><span class="st">"factor"</span>) dt1<span class="sc">$</span>notes<span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dt1<span class="sc">$</span>notes)</span>
+<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb9-123"><a href="#cb9-123" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert Missing Values to NA for non-dates</span></span>
+<span id="cb9-124"><a href="#cb9-124" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb9-125"><a href="#cb9-125" aria-hidden="true" tabindex="-1"></a>dt1<span class="sc">$</span>pi <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">ifelse</span>((<span class="fu">trimws</span>(<span class="fu">as.character</span>(dt1<span class="sc">$</span>pi))<span class="sc">==</span><span class="fu">trimws</span>(<span class="st">"NA"</span>)),<span class="cn">NA</span>,<span class="fu">as.character</span>(dt1<span class="sc">$</span>pi)))</span>
+<span id="cb9-126"><a href="#cb9-126" aria-hidden="true" tabindex="-1"></a>dt1<span class="sc">$</span>site <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">ifelse</span>((<span class="fu">trimws</span>(<span class="fu">as.character</span>(dt1<span class="sc">$</span>site))<span class="sc">==</span><span class="fu">trimws</span>(<span class="st">"NA"</span>)),<span class="cn">NA</span>,<span class="fu">as.character</span>(dt1<span class="sc">$</span>site)))</span>
+<span id="cb9-127"><a href="#cb9-127" aria-hidden="true" tabindex="-1"></a>dt1<span class="sc">$</span>x.spmnad83 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((<span class="fu">trimws</span>(<span class="fu">as.character</span>(dt1<span class="sc">$</span>x.spmnad83))<span class="sc">==</span><span class="fu">trimws</span>(<span class="st">"NA"</span>)),<span class="cn">NA</span>,dt1<span class="sc">$</span>x.spmnad83)               </span>
+<span id="cb9-128"><a href="#cb9-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-129"><a href="#cb9-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-130"><a href="#cb9-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-131"><a href="#cb9-131" aria-hidden="true" tabindex="-1"></a><span class="co"># Here is the structure of the input data frame:</span></span>
+<span id="cb9-132"><a href="#cb9-132" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dt1)                            </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   106192 obs. of  38 variables:
+ $ date               : Date, format: "2004-06-30" "2004-06-30" ...
+ $ year               : int  2004 2004 2004 2004 2004 2004 2004 2004 2004 2004 ...
+ $ doy                : int  182 182 182 182 182 182 182 182 182 182 ...
+ $ time               : chr  NA NA NA NA ...
+ $ pi                 : Factor w/ 7 levels "Davidson","Ellison",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ site               : Factor w/ 21 levels "Barre Woods",..: 3 3 3 3 3 3 3 3 3 3 ...
+ $ x.spmnad83         : num  144692 144692 144692 144692 144692 ...
+ $ y.spmnad83         : num  921459 921459 921459 921459 921459 ...
+ $ elevation          : int  361 361 361 361 361 361 361 361 361 361 ...
+ $ block              : Factor w/ 2 levels "Ridge","Valley": NA NA NA NA NA NA NA NA NA NA ...
+ $ plot               : Factor w/ 50 levels "1","10","11",..: NA NA NA NA NA NA NA NA NA NA ...
+ $ distance           : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ transect           : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ site.desc          : Factor w/ 10 levels "Coniferous","Deciduous",..: 2 2 2 2 2 2 2 2 2 2 ...
+ $ soil.series        : Factor w/ 17 levels "Agawam fine sandy loam",..: 8 8 8 8 8 8 8 8 8 8 ...
+ $ soil.drainage.class: Factor w/ 9 levels "ED","M","MWD",..: 9 9 9 9 9 9 9 9 9 9 ...
+ $ obs.exp            : Factor w/ 2 levels "exp","obs": 2 2 2 2 2 2 2 2 2 2 ...
+ $ treat.level        : Factor w/ 11 levels "5degC","control",..: NA NA NA NA NA NA NA NA NA NA ...
+ $ replicate          : Factor w/ 9 levels "1","2","3","4",..: NA NA NA NA NA NA NA NA NA NA ...
+ $ auto.manual        : Factor w/ 2 levels "auto","manual": 2 2 2 2 2 2 2 2 2 2 ...
+ $ collar             : Factor w/ 225 levels "1","10","100",..: 1 11 12 24 43 79 96 112 131 148 ...
+ $ tsoil.1            : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ tsoil.1.depth      : num  10 10 10 10 10 10 10 10 10 10 ...
+ $ tsoil.2            : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ tsoil.2.depth      : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ co2.flux           : num  2.14 5.97 4.6 2.59 2.01 2.44 3.46 4.64 3.4 5.49 ...
+ $ range.min          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ range.mean         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ range.max          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ x.cutoff           : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ mean.slope         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ stdev.slope        : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ n.pts              : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ flag.stdev         : Factor w/ 1 level "0": NA NA NA NA NA NA NA NA NA NA ...
+ $ collar.height      : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ subplot            : Factor w/ 8 levels "a","b","B2","B4",..: NA NA NA NA NA NA NA NA NA NA ...
+ $ subplot.t          : Factor w/ 3 levels "c","d","x": NA NA NA NA NA NA NA NA NA NA ...
+ $ notes              : Factor w/ 17 levels "0","3SHRMS!",..: NA NA NA NA NA NA NA NA NA NA ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(dt1) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from package:base:
+
+    pi</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # The analyses below are basic descriptions of the variables. After testing, they should be replaced.                 </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get more details on character variables</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                 </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(as.factor(dt1$pi)) </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.factor</span>(dt1<span class="sc">$</span>site)) <span class="sc">%&gt;%</span> <span class="fu">data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    .
+Barre Woods      1422
+Black gum swamp     3
+Charlton          335
+Dry Down         2467
+EMS             48310
+EMS-auto        34640
+Farm              275
+Hardwood          283
+Hemlock          1758
+HF                369
+LPH              2505
+Montauk           258
+NWF               757
+NWM              1175
+NWN              1474
+Prospect Hill    4278
+Sime+G104660s       1
+Simes            2849
+SWF              1094
+SWM              1121
+SWN               818</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.factor</span>(dt1<span class="sc">$</span>block)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Ridge Valley   NA's 
+   375    405 105412 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="fu">summary</span>(<span class="fu">as.factor</span>(dt1<span class="sc">$</span>plot)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     summary.as.factor.dt1.plot..
+1                             323
+10                            332
+11                            306
+12                            329
+13                            332
+14                            306
+15                            249
+16                            406
+17                            253
+18                            306
+2                             643
+21                            158
+25                             79
+27                             79
+28                             79
+3                             798
+31                             79
+34                             79
+4                             550
+5                             799
+6                             793
+7                             699
+8                             330
+9                             243
+A4                            278
+A5                            282
+B3                            287
+B4                            285
+B5                            272
+C3                            307
+D5                            295
+E3                            308
+G3                            199
+G5                            296
+H3                            206
+H4                            232
+HC                             60
+HH                             42
+HL                             49
+HNS                            47
+PC                             48
+PH                             47
+PL                             33
+PNS                            43
+X1                            271
+X2                            263
+X3                            248
+X4                            170
+X5                            237
+X6                            218
+NA's                        92619</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detach</span>(dt1)               </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="narrowing-scope-of-dataframe-barre-woods" class="level3">
+<h3 class="anchored" data-anchor-id="narrowing-scope-of-dataframe-barre-woods">Narrowing scope of dataframe (BARRE WOODS)</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">### ANALYSIS #### 16, 21 </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>barre_woods <span class="ot">&lt;-</span> dt1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(site <span class="sc">==</span> <span class="st">"Barre Woods"</span> <span class="sc">&amp;</span> (treat.level <span class="sc">==</span> <span class="st">"control"</span> <span class="sc">|</span> treat.level <span class="sc">==</span> <span class="st">"5degC"</span> <span class="sc">|</span> treat.level <span class="sc">==</span> <span class="st">"heated"</span>) ) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="st">"co2.flux"</span>, <span class="st">"treat.level"</span>, <span class="st">"plot"</span>)) <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">co2_flux =</span> co2.flux, <span class="at">treatment =</span> treat.level)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(barre_woods)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine date and time columns into a datetime object</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>barre_woods<span class="sc">$</span>datetime_combined <span class="ot">&lt;-</span> <span class="fu">ymd_hm</span>(<span class="fu">paste</span>(barre_woods<span class="sc">$</span>date, barre_woods<span class="sc">$</span>time))</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Dropping the original 'date' and 'time' columns if you don't need them anymore</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>barre_woods <span class="ot">&lt;-</span> barre_woods[, <span class="sc">!</span>(<span class="fu">names</span>(barre_woods) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">'date'</span>, <span class="st">'time'</span>))]</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="do">## reordering so that datetime is first </span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>reorder_columns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"datetime_combined"</span>, <span class="st">"co2_flux"</span>, <span class="st">"treatment"</span>, <span class="st">"plot"</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>barre_woods <span class="ot">&lt;-</span> barre_woods[, reorder_columns]</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># - </span><span class="al">NOTE</span><span class="co">: </span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co"># - soil drainage class is all WD at Barre Woods. </span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co"># - Site Description is all Deciduous. </span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># - plot 16 was chosen for its high sample count (95 observations) and high replicate rate (5)</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># - co2 flux is measured in micro-mole Per Meter Squared Per Second</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>bw_control <span class="ot">&lt;-</span> barre_woods <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="st">"control"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(datetime_combined <span class="sc">&gt;</span> <span class="st">"2004-01-01 00:00:00"</span>)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># so basically now I have to find the average for the entire plot (average all carbon fluxes) for each recorded time. </span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>bw_control_avg <span class="ot">&lt;-</span> bw_control <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(datetime_combined) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">mean_flux =</span> <span class="fu">mean</span>(co2_flux))</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>bw_heated<span class="ot">&lt;-</span> barre_woods <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="st">"heated"</span>) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(datetime_combined <span class="sc">&gt;</span> <span class="st">"2004-01-01 00:00:00"</span>)</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>bw_heated_avg_2003 <span class="ot">&lt;-</span> bw_heated <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(datetime_combined) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">mean_flux =</span> <span class="fu">mean</span>(co2_flux))</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>bw_5C <span class="ot">&lt;-</span> barre_woods <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="st">"5degC"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(datetime_combined <span class="sc">&gt;</span> <span class="st">"2004-01-01 00:00:00"</span>)</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>bw_5C_avg <span class="ot">&lt;-</span> bw_5C <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(datetime_combined) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">mean_flux =</span> <span class="fu">mean</span>(co2_flux))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="section" class="level3">
+<h3 class="anchored" data-anchor-id="section"></h3>
+</section>
+</section>
+</section>
+<section id="exploratory-analysis-what-does-the-data-look-like" class="level1">
+<h1>Exploratory Analysis: What does the data look like?</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#first convert dataframes to tsibble and graph </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bw_control_avg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 48 × 2
+   datetime_combined   mean_flux
+   &lt;dttm&gt;                  &lt;dbl&gt;
+ 1 2004-04-21 06:00:00      1.13
+ 2 2004-04-21 14:00:00      1.31
+ 3 2004-05-27 06:00:00      2.82
+ 4 2004-05-27 14:00:00      3.22
+ 5 2004-06-16 06:00:00      3.19
+ 6 2004-06-16 14:00:00      2.93
+ 7 2004-07-14 06:00:00      4.21
+ 8 2004-07-14 14:00:00      4.59
+ 9 2004-08-17 06:00:00      4.42
+10 2004-08-17 14:00:00      5.31
+# ℹ 38 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#bw_control_tsb &lt;- bw_control %&gt;% as_tsibble()</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>bw_5C_avg) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime_combined, <span class="at">y=</span>mean_flux))  <span class="sc">+</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime_combined, <span class="at">y=</span>mean_flux)) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Date"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"CO2 flux"</span>)  <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">1</span>,<span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="hvforest_soil_respir_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>bw_control_avg) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime_combined, <span class="at">y=</span>mean_flux))  <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime_combined, <span class="at">y=</span>mean_flux)) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Date"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"CO2 flux"</span>)  <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">1</span>,<span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hvforest_soil_respir_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#ggplot(data=bw_heated_avg_2003) + geom_line(aes(x=datetime_combined, y=mean_flux))  + xlab("Date") + ylab("CO2 flux")  + ylim(1,8)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Bind rows so I can plot the two graphs into plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>both_plots <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(bw_control_avg, bw_5C_avg) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `datetime_combined` -&gt; `datetime_combined...1`
+• `mean_flux` -&gt; `mean_flux...2`
+• `datetime_combined` -&gt; `datetime_combined...3`
+• `mean_flux` -&gt; `mean_flux...4`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>both_plots <span class="ot">&lt;-</span> both_plots <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">datetime_combined =</span> datetime_combined...<span class="dv">1</span>, <span class="at">Control =</span> mean_flux...<span class="dv">2</span>, <span class="at">Treatment =</span> mean_flux...<span class="dv">4</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>both_plots <span class="ot">&lt;-</span> both_plots[, <span class="sc">!</span>(<span class="fu">names</span>(both_plots) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">'datetime_combined...3'</span>))]</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>both_plots_longer <span class="ot">&lt;-</span> both_plots <span class="sc">%&gt;%</span> reshape2<span class="sc">::</span><span class="fu">melt</span>(<span class="at">id =</span> <span class="st">"datetime_combined"</span>) </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(both_plots_longer)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>both_plots_longer, <span class="fu">aes</span>(<span class="at">x=</span> datetime_combined, <span class="at">y=</span>value, <span class="at">color =</span> variable)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>()  <span class="sc">+</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"Date"</span>) <span class="sc">+</span> </span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="st">"CO2 flux, μmol/(m²·s) "</span>)  <span class="sc">+</span> </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">1</span>,<span class="dv">8</span>) <span class="sc">+</span> </span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"Plot Type"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="hvforest_soil_respir_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong># (optional if there’s time): Exploratory time series analysis on the treatment plot.</strong></p>
+<pre class="{# {r}"><code>
+treatment_plots_longer_tsi &lt;- both_plots_longer %&gt;%  group_by(variable = "Treatment")
+treatment_plots_longer_tsi &lt;- both_plots_longer %&gt;% select(c(datetime_combined = "datetime_combined", value = "value"))
+
+
+## Because there were duplicate observations in one day, I had to take the mean of the observations each day to be able to do the time series analysis.
+
+
+# Convert datetime_combined to Date to extract the day
+treatment_plots_longer_tsi &lt;- treatment_plots_longer_tsi %&gt;%
+  mutate(day = as.Date(datetime_combined))
+
+# Group by day and calculate the mean for each day
+daily_means_treatment &lt;- treatment_plots_longer_tsi %&gt;%
+  group_by(day) %&gt;%
+  summarize(mean_value = mean(value))
+
+dmeans_treatment_tsi &lt;- daily_means_treatment %&gt;% as_tsibble()
+
+
+
+ggplot(data= dmeans_treatment_tsi, aes(x=day, y=mean_value)) + geom_line() + geom_point() + xlab("Date") + ylab("average daily carbon flux from treatment plot") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%Y-%m-%d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+</code></pre>
+<p>After I adjust for seasonality, then can I do the comparison?</p>
+</section>
+<section id="exploratory-data-analysis-no-time-component" class="level1">
+<h1><strong>Exploratory</strong> data analysis (no time component)</h1>
+<p>Can we visually assess a difference in carbon flux between the control and treated plots in this study?</p>
+<section id="plotting-the-data-as-is" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-the-data-as-is">Plotting the data as is:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>study_data <span class="ot">&lt;-</span> both_plots_longer <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(variable) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"variable"</span>, <span class="st">"value"</span>)) </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>study_data <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>variable, <span class="at">y=</span>value, <span class="at">color =</span> variable)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"Plot type"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Plot type"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Carbon Flux, μmol/(m²·s)"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hvforest_soil_respir_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Running the summary() function on control and treatment observations:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(study_data<span class="sc">$</span>value[study_data<span class="sc">$</span>variable <span class="sc">==</span> <span class="st">"Control"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.076   1.708   2.661   2.908   3.531   6.939 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(study_data<span class="sc">$</span>value[study_data<span class="sc">$</span>variable <span class="sc">==</span> <span class="st">"Treatment"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.9489  2.0131  3.0061  3.1223  3.7022  7.3467 </code></pre>
+</div>
+</div>
+<p>The summary statistics reveal that</p>
+</section>
+<section id="plotting-the-data-with-a-violin-plot-upgraded-box-plot" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-the-data-with-a-violin-plot-upgraded-box-plot">Plotting the data with a violin-plot (upgraded box-plot)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>study_data <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>variable, <span class="at">y=</span>value)) <span class="sc">+</span> <span class="fu">geom_violin</span>(<span class="at">alpha=</span><span class="fl">0.3</span>,  <span class="fu">aes</span>(<span class="at">fill =</span> variable))  <span class="sc">+</span> <span class="fu">geom_boxplot</span>(<span class="at">width=</span><span class="fl">0.1</span>, <span class="fu">aes</span>(<span class="at">fill =</span> variable)) <span class="sc">+</span>   <span class="fu">stat_summary</span>(<span class="at">fun=</span>mean, <span class="at">geom=</span><span class="st">"point"</span>, <span class="at">shape=</span><span class="dv">23</span>, <span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Study Plot"</span>) <span class="sc">+</span> </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Plot type"</span>) <span class="sc">+</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"CO2 flux, μmol/(m²·s)"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hvforest_soil_respir_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="single-variable-categorical-ols" class="level1">
+<h1>Single variable, Categorical OLS</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>simple_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(value <span class="sc">~</span> variable, <span class="at">data =</span> both_plots_longer)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(simple_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = value ~ variable, data = both_plots_longer)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.1734 -1.1376 -0.1797  0.6232  4.2244 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)         2.9082     0.2044  14.225   &lt;2e-16 ***
+variableTreatment   0.2141     0.2891   0.741    0.461    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.416 on 94 degrees of freedom
+Multiple R-squared:  0.005801,  Adjusted R-squared:  -0.004776 
+F-statistic: 0.5484 on 1 and 94 DF,  p-value: 0.4608</code></pre>
+</div>
+</div>
+<ul>
+<li><p><strong>Interpretation:</strong> The coefficient represents the estimated difference in the mean carbon flux value between the Treatment and Control groups. However, since the p-value is greater than 0.05, we fail to reject the null hypothesis that there is no difference.</p></li>
+<li><p><strong>Residual standard error:</strong> 1.416</p>
+<ul>
+<li>This is a measure of the variability of the residuals.</li>
+</ul></li>
+<li><p><strong>Multiple R-squared:</strong> 0.005801</p>
+<ul>
+<li>This indicates the proportion of variance in the response variable explained by the model. In this case, it’s very low.</li>
+</ul></li>
+<li><p><strong>Adjusted R-squared:</strong> -0.004776</p>
+<ul>
+<li>Similar to R-squared but adjusted for the number of predictors. Negative values may indicate that the model is not a good fit.</li>
+</ul></li>
+<li><p><strong>F-statistic:</strong> 0.5484 on 1 and 94 DF</p>
+<ul>
+<li>This tests the overall significance of the model. The p-value (0.4608) suggests that the model is not statistically significant.</li>
+</ul></li>
+</ul>
+<p>Finding a suitable model: more variables/ interaction terms.</p>
+<section id="just-adding-a-time-component-no-interaction-effects" class="level2">
+<h2 class="anchored" data-anchor-id="just-adding-a-time-component-no-interaction-effects">Just adding a time component (no interaction effects)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>both_plots_longer<span class="sc">$</span>month <span class="ot">&lt;-</span> <span class="fu">format</span>(both_plots_longer<span class="sc">$</span>datetime_combined, <span class="st">"%m"</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>lm_interaction_month <span class="ot">&lt;-</span> <span class="fu">lm</span>(value <span class="sc">~</span> variable <span class="sc">+</span> month, <span class="at">data =</span> both_plots_longer)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_interaction_month)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = value ~ variable + month, data = both_plots_longer)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.31706 -0.33124 -0.04821  0.36395  1.61979 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)         1.3575     0.1796   7.560 3.85e-11 ***
+variableTreatment   0.2141     0.1197   1.789  0.07715 .  
+month05             1.4546     0.2677   5.434 4.95e-07 ***
+month06             1.8584     0.2240   8.298 1.22e-12 ***
+month07             4.1553     0.2394  17.355  &lt; 2e-16 ***
+month08             2.6588     0.2394  11.105  &lt; 2e-16 ***
+month09             1.2322     0.2394   5.147 1.63e-06 ***
+month10             0.7519     0.2394   3.140  0.00231 ** 
+month11             0.1599     0.2394   0.668  0.50597    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5865 on 87 degrees of freedom
+Multiple R-squared:  0.8423,    Adjusted R-squared:  0.8278 
+F-statistic: 58.07 on 8 and 87 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="assuming-interaction-effects" class="level2">
+<h2 class="anchored" data-anchor-id="assuming-interaction-effects">Assuming interaction effects</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>both_plots_longer<span class="sc">$</span>month <span class="ot">&lt;-</span> <span class="fu">format</span>(both_plots_longer<span class="sc">$</span>datetime_combined, <span class="st">"%m"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>lm_interaction_hr <span class="ot">&lt;-</span> <span class="fu">lm</span>(value <span class="sc">~</span> variable <span class="sc">+</span> month <span class="sc">+</span> variable<span class="sc">:</span>month, <span class="at">data =</span> both_plots_longer)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(lm_interaction_hr))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = value ~ variable + month + variable:month, data = both_plots_longer)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.35500 -0.29713 -0.03053  0.32708  1.66981 
+
+Coefficients:
+                          Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                1.26037    0.23938   5.265 1.15e-06 ***
+variableTreatment          0.40833    0.33853   1.206 0.231297    
+month05                    1.36241    0.37849   3.600 0.000551 ***
+month06                    1.80991    0.31667   5.716 1.81e-07 ***
+month07                    4.30241    0.33853  12.709  &lt; 2e-16 ***
+month08                    3.10500    0.33853   9.172 4.03e-14 ***
+month09                    1.43685    0.33853   4.244 5.86e-05 ***
+month10                    0.80370    0.33853   2.374 0.019988 *  
+month11                    0.21315    0.33853   0.630 0.530731    
+variableTreatment:month05  0.18444    0.53526   0.345 0.731309    
+variableTreatment:month06  0.09708    0.44783   0.217 0.828928    
+variableTreatment:month07 -0.29426    0.47875  -0.615 0.540539    
+variableTreatment:month08 -0.89241    0.47875  -1.864 0.065987 .  
+variableTreatment:month09 -0.40926    0.47875  -0.855 0.395190    
+variableTreatment:month10 -0.10370    0.47875  -0.217 0.829062    
+variableTreatment:month11 -0.10648    0.47875  -0.222 0.824558    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5864 on 80 degrees of freedom
+Multiple R-squared:  0.855, Adjusted R-squared:  0.8278 
+F-statistic: 31.45 on 15 and 80 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p><br>
+The results are interesting! Four months: May, June, July, August, and September, had heating effects. This makes intuitive sense, as these months are summer months. An interesting case arises in this study, since winter months should also have effects in the negative direction, however, winter months here are actually simulated observations based on another model, and not real observations, since the study couldn’t actually take measurements during those winter months as the plot was covered in snow.</p>
+<pre><code>Coefficients:
+                          Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                1.26037    0.23938   5.265 1.15e-06 ***
+variableTreatment          0.40833    0.33853   1.206 0.231297    
+
+month05                    1.36241    0.37849   3.600 0.000551 ***
+month06                    1.80991    0.31667   5.716 1.81e-07 ***
+month07                    4.30241    0.33853  12.709  &lt; 2e-16 ***
+month08                    3.10500    0.33853   9.172 4.03e-14 ***
+month09                    1.43685    0.33853   4.244 5.86e-05 ***
+month10                    0.80370    0.33853   2.374 0.019988 *  </code></pre>
+</section>
+<section id="how-does-the-simple-linear-regression-compare-to-the-multiple-linear-regression" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-the-simple-linear-regression-compare-to-the-multiple-linear-regression">How does the simple linear regression compare to the multiple linear regression?</h2>
+<pre><code>Simple Linear regression:                                   Adjusted R-squared: -0.004776 
+Multiple Linear regression:                                 Adjusted R-squared:  0.8278
+Multiple Linear regression with interaction effect (month): Adjusted R-squared:  0.8278 </code></pre>
+<p>Overall the adjust R-squares of the multiple linear regression models (with and/or without interaction effects) which take into account a time variable seem to yield a much better result than the simple linear regression. The incorporation of an interaction effect makes negligible difference in the model, so I’ve chosen to omit it in choosing the most suitable model for this experiment.</p>
+<p>The Q-Q plot of this graph suggests that …….</p>
+</section>
+</section>
+<section id="evaluating-the-best-model-single-variable-categorical-with-time-component" class="level1">
+<h1>Evaluating the best model (Single variable categorical with time component:</h1>
+<section id="step-1-evaluating-ols-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-evaluating-ols-assumptions">Step 1: Evaluating OLS assumptions</h2>
+<p><strong>1) Population parameters are linear, with additive disturbance</strong></p>
+<ul>
+<li>We can assume that the parameters enter linearly; in this case, I’m assuming that small increases in temperature will cause a proportional increase in soil respiration on a local level. <strong>(CITE LITERATURE).</strong></li>
+</ul>
+<p><strong>2) Our X variable is exogenous</strong></p>
+<p>We can’t test for this, but with the addition of the time variable, we have significantly improved the simple linear regression and therefore reduced further possibility of omitted variable bias</p>
+<p><strong>3) X variable has variation</strong></p>
+<p>The carbon flux data indeed show a wide range of results.</p>
+<p><strong>4)</strong> The population disturbance u is independently and identically distributed as a normal random variable with mean 0 and variance sigma squared</p>
+<p>4) Population disturbance is independently and identically distribued as a normal random variable with mean 0 and variance sigma^2.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

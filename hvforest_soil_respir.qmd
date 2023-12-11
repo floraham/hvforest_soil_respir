@@ -1,0 +1,505 @@
+---
+title: "hvforest"
+author: "Flora Hamilton"
+format: html
+editor: visual
+---
+
+# Question: "Does temperature impact soil respiration rates?"
+
+To answer this question, I will be looking at testing data from the Harvard Forest LTER's *20-Year Synthesis of Soil Respiration Data at Harvard Forest 1991-2008.* I will be conducting a statistical analysis comparing the soil respiration rates of a temperature-treated plot and a control plot where no temperature is applied, a test which simulates global warming conditions.
+
+The data set is downloadable and the methodology described from the following locations:
+
+-   EDI: <https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-hfr.194.10>
+
+-   Harvard Forest LTER: https://harvardforest1.fas.harvard.edu/exist/apps/datasets/showData.html?id=hf018
+
+```{r, echo= FALSE, results='markup'}
+library(tidyverse)
+library(stats)
+library(readr)
+library(lubridate)
+library(feasts)
+library(tsibble)
+library(forecast)
+```
+
+## Reading in and cleaning
+
+This R code for cleaning the data was imported from the associated EDI repository.
+
+```{r}
+# Package ID: knb-lter-hfr.194.10 Cataloging System:https://pasta.edirepository.org.
+# Data set title: 20-Year Synthesis of Soil Respiration Data at Harvard Forest 1991-2008.
+# Data set creator:  Eric Davidson -  Aaron Ellison -  Adrien Finzi -  Julian Hadley -   Jerry Melillo -   William Munger -    Scott Ollinger -   Jim Tang -    Ruth Varner -  
+# Contact:    - Information Manager Harvard Forest  - hf-im@lists.fas.harvard.edu
+# Stylesheet v2.11 for metadata conversion into program: John H. Porter, Univ. Virginia, jporter@virginia.edu 
+
+
+#Reading in data 
+inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-hfr/194/10/0a9a62378dac53ae0fdd6afd0b8d344e" 
+infile1 <- tempfile()
+try(download.file(inUrl1,infile1,method="curl"))
+if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method="auto")
+
+                   
+ dt1 <-read.csv(infile1,header=F 
+          ,skip=1
+            ,sep=","  
+        , col.names=c("date",     
+                    "year",     
+                    "doy",     
+                    "time",     
+                    "pi",     
+                    "site",     
+                    "x.spmnad83",     
+                    "y.spmnad83",     
+                    "elevation",     
+                    "block",     
+                    "plot",     
+                    "distance",     
+                    "transect",     
+                    "site.desc",     
+                    "soil.series",     
+                    "soil.drainage.class",     
+                    "obs.exp",     
+                    "treat.level",     
+                    "replicate",     
+                    "auto.manual",     
+                    "collar",     
+                    "tsoil.1",     
+                    "tsoil.1.depth",     
+                    "tsoil.2",     
+                    "tsoil.2.depth",     
+                    "co2.flux",     
+                    "range.min",     
+                    "range.mean",     
+                    "range.max",     
+                    "x.cutoff",     
+                    "mean.slope",     
+                    "stdev.slope",     
+                    "n.pts",     
+                    "flag.stdev",     
+                    "collar.height",     
+                    "subplot",     
+                    "subplot.t",     
+                    "notes"    ), check.names=TRUE)
+               
+unlink(infile1)
+		    
+# Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
+                                                   
+# attempting to convert dt1$date dateTime string to R date structure (date or POSIXct)                                
+tmpDateFormat<-"%Y-%m-%d"
+tmp1date<-as.Date(dt1$date,format=tmpDateFormat)
+# Keep the new dates only if they all converted correctly
+if(length(tmp1date) == length(tmp1date[!is.na(tmp1date)])){dt1$date <- tmp1date } else {print("Date conversion failed for dt1$date. Please inspect the data and do the date conversion yourself.")}                                                                    
+rm(tmpDateFormat,tmp1date) 
+if (class(dt1$doy)=="factor") dt1$doy <-as.numeric(levels(dt1$doy))[as.integer(dt1$doy) ]               
+if (class(dt1$doy)=="character") dt1$doy <-as.numeric(dt1$doy)
+if (class(dt1$pi)!="factor") dt1$pi<- as.factor(dt1$pi)
+if (class(dt1$site)!="factor") dt1$site<- as.factor(dt1$site)
+if (class(dt1$x.spmnad83)=="factor") dt1$x.spmnad83 <-as.numeric(levels(dt1$x.spmnad83))[as.integer(dt1$x.spmnad83) ]               
+if (class(dt1$x.spmnad83)=="character") dt1$x.spmnad83 <-as.numeric(dt1$x.spmnad83)
+if (class(dt1$y.spmnad83)=="factor") dt1$y.spmnad83 <-as.numeric(levels(dt1$y.spmnad83))[as.integer(dt1$y.spmnad83) ]               
+if (class(dt1$y.spmnad83)=="character") dt1$y.spmnad83 <-as.numeric(dt1$y.spmnad83)
+if (class(dt1$elevation)=="factor") dt1$elevation <-as.numeric(levels(dt1$elevation))[as.integer(dt1$elevation) ]               
+if (class(dt1$elevation)=="character") dt1$elevation <-as.numeric(dt1$elevation)
+if (class(dt1$block)!="factor") dt1$block<- as.factor(dt1$block)
+if (class(dt1$plot)!="factor") dt1$plot<- as.factor(dt1$plot)
+if (class(dt1$distance)=="factor") dt1$distance <-as.numeric(levels(dt1$distance))[as.integer(dt1$distance) ]               
+if (class(dt1$distance)=="character") dt1$distance <-as.numeric(dt1$distance)
+if (class(dt1$transect)=="factor") dt1$transect <-as.numeric(levels(dt1$transect))[as.integer(dt1$transect) ]               
+if (class(dt1$transect)=="character") dt1$transect <-as.numeric(dt1$transect)
+if (class(dt1$site.desc)!="factor") dt1$site.desc<- as.factor(dt1$site.desc)
+if (class(dt1$soil.series)!="factor") dt1$soil.series<- as.factor(dt1$soil.series)
+if (class(dt1$soil.drainage.class)!="factor") dt1$soil.drainage.class<- as.factor(dt1$soil.drainage.class)
+if (class(dt1$obs.exp)!="factor") dt1$obs.exp<- as.factor(dt1$obs.exp)
+if (class(dt1$treat.level)!="factor") dt1$treat.level<- as.factor(dt1$treat.level)
+if (class(dt1$replicate)!="factor") dt1$replicate<- as.factor(dt1$replicate)
+if (class(dt1$auto.manual)!="factor") dt1$auto.manual<- as.factor(dt1$auto.manual)
+if (class(dt1$collar)!="factor") dt1$collar<- as.factor(dt1$collar)
+if (class(dt1$tsoil.1)=="factor") dt1$tsoil.1 <-as.numeric(levels(dt1$tsoil.1))[as.integer(dt1$tsoil.1) ]               
+if (class(dt1$tsoil.1)=="character") dt1$tsoil.1 <-as.numeric(dt1$tsoil.1)
+if (class(dt1$tsoil.1.depth)=="factor") dt1$tsoil.1.depth <-as.numeric(levels(dt1$tsoil.1.depth))[as.integer(dt1$tsoil.1.depth) ]               
+if (class(dt1$tsoil.1.depth)=="character") dt1$tsoil.1.depth <-as.numeric(dt1$tsoil.1.depth)
+if (class(dt1$tsoil.2)=="factor") dt1$tsoil.2 <-as.numeric(levels(dt1$tsoil.2))[as.integer(dt1$tsoil.2) ]               
+if (class(dt1$tsoil.2)=="character") dt1$tsoil.2 <-as.numeric(dt1$tsoil.2)
+if (class(dt1$tsoil.2.depth)=="factor") dt1$tsoil.2.depth <-as.numeric(levels(dt1$tsoil.2.depth))[as.integer(dt1$tsoil.2.depth) ]               
+if (class(dt1$tsoil.2.depth)=="character") dt1$tsoil.2.depth <-as.numeric(dt1$tsoil.2.depth)
+if (class(dt1$co2.flux)=="factor") dt1$co2.flux <-as.numeric(levels(dt1$co2.flux))[as.integer(dt1$co2.flux) ]               
+if (class(dt1$co2.flux)=="character") dt1$co2.flux <-as.numeric(dt1$co2.flux)
+if (class(dt1$range.min)=="factor") dt1$range.min <-as.numeric(levels(dt1$range.min))[as.integer(dt1$range.min) ]               
+if (class(dt1$range.min)=="character") dt1$range.min <-as.numeric(dt1$range.min)
+if (class(dt1$range.mean)=="factor") dt1$range.mean <-as.numeric(levels(dt1$range.mean))[as.integer(dt1$range.mean) ]               
+if (class(dt1$range.mean)=="character") dt1$range.mean <-as.numeric(dt1$range.mean)
+if (class(dt1$range.max)=="factor") dt1$range.max <-as.numeric(levels(dt1$range.max))[as.integer(dt1$range.max) ]               
+if (class(dt1$range.max)=="character") dt1$range.max <-as.numeric(dt1$range.max)
+if (class(dt1$x.cutoff)=="factor") dt1$x.cutoff <-as.numeric(levels(dt1$x.cutoff))[as.integer(dt1$x.cutoff) ]               
+if (class(dt1$x.cutoff)=="character") dt1$x.cutoff <-as.numeric(dt1$x.cutoff)
+if (class(dt1$mean.slope)=="factor") dt1$mean.slope <-as.numeric(levels(dt1$mean.slope))[as.integer(dt1$mean.slope) ]               
+if (class(dt1$mean.slope)=="character") dt1$mean.slope <-as.numeric(dt1$mean.slope)
+if (class(dt1$stdev.slope)=="factor") dt1$stdev.slope <-as.numeric(levels(dt1$stdev.slope))[as.integer(dt1$stdev.slope) ]               
+if (class(dt1$stdev.slope)=="character") dt1$stdev.slope <-as.numeric(dt1$stdev.slope)
+if (class(dt1$n.pts)=="factor") dt1$n.pts <-as.numeric(levels(dt1$n.pts))[as.integer(dt1$n.pts) ]               
+if (class(dt1$n.pts)=="character") dt1$n.pts <-as.numeric(dt1$n.pts)
+if (class(dt1$flag.stdev)!="factor") dt1$flag.stdev<- as.factor(dt1$flag.stdev)
+if (class(dt1$collar.height)=="factor") dt1$collar.height <-as.numeric(levels(dt1$collar.height))[as.integer(dt1$collar.height) ]               
+if (class(dt1$collar.height)=="character") dt1$collar.height <-as.numeric(dt1$collar.height)
+if (class(dt1$subplot)!="factor") dt1$subplot<- as.factor(dt1$subplot)
+if (class(dt1$subplot.t)!="factor") dt1$subplot.t<- as.factor(dt1$subplot.t)
+if (class(dt1$notes)!="factor") dt1$notes<- as.factor(dt1$notes)
+                
+# Convert Missing Values to NA for non-dates
+                
+dt1$pi <- as.factor(ifelse((trimws(as.character(dt1$pi))==trimws("NA")),NA,as.character(dt1$pi)))
+dt1$site <- as.factor(ifelse((trimws(as.character(dt1$site))==trimws("NA")),NA,as.character(dt1$site)))
+dt1$x.spmnad83 <- ifelse((trimws(as.character(dt1$x.spmnad83))==trimws("NA")),NA,dt1$x.spmnad83)               
+
+
+
+# Here is the structure of the input data frame:
+str(dt1)                            
+attach(dt1) 
+
+
+# # The analyses below are basic descriptions of the variables. After testing, they should be replaced.                 
+
+# Get more details on character variables
+                 
+#summary(as.factor(dt1$pi)) 
+#summary(as.factor(dt1$site)) %>% data.frame()
+#summary(as.factor(dt1$block)) 
+#data.frame(summary(as.factor(dt1$plot)))
+
+detach(dt1)               
+```
+
+### Narrowing scope of dataframe (BARRE WOODS)
+
+```{r}
+
+barre_woods <- dt1 %>% filter(site == "Barre Woods" & (treat.level == "control" | treat.level == "5degC" | treat.level == "heated") ) %>% select(c(1, 4, "co2.flux", "treat.level", "plot")) %>% rename(co2_flux = co2.flux, treatment = treat.level)
+
+View(barre_woods)
+
+# Combine date and time columns into a datetime object
+barre_woods$datetime_combined <- ymd_hm(paste(barre_woods$date, barre_woods$time))
+
+# Dropping the original 'date' and 'time' columns if you don't need them anymore
+barre_woods <- barre_woods[, !(names(barre_woods) %in% c('date', 'time'))]
+
+## reordering so that datetime is first 
+reorder_columns <- c("datetime_combined", "co2_flux", "treatment", "plot")
+barre_woods <- barre_woods[, reorder_columns]
+
+
+# - NOTE: 
+# - soil drainage class is all WD at Barre Woods. 
+# - Site Description is all Deciduous. 
+# - plot 16 was chosen for its high sample count (95 observations) and high replicate rate (5)
+# - co2 flux is measured in micro-mole Per Meter Squared Per Second
+
+
+bw_control <- barre_woods %>% filter(treatment == "control") %>% filter(datetime_combined > "2004-01-01 00:00:00")
+# so basically now I have to find the average for the entire plot (average all carbon fluxes) for each recorded time. 
+bw_control_avg <- bw_control %>% group_by(datetime_combined) %>% summarise(mean_flux = mean(co2_flux))
+
+bw_heated<- barre_woods %>% filter(treatment == "heated") %>%  filter(datetime_combined > "2004-01-01 00:00:00")
+
+bw_heated_avg_2003 <- bw_heated %>% group_by(datetime_combined) %>% summarise(mean_flux = mean(co2_flux))
+
+bw_5C <- barre_woods %>% filter(treatment == "5degC") %>% filter(datetime_combined > "2004-01-01 00:00:00")
+
+
+bw_5C_avg <- bw_5C %>% group_by(datetime_combined) %>% summarise(mean_flux = mean(co2_flux))
+```
+
+### 
+
+# Exploratory Analysis: What does the data look like?
+
+```{r}
+
+#first convert dataframes to tsibble and graph 
+bw_control_avg
+#bw_control_tsb <- bw_control %>% as_tsibble()
+
+ggplot(data=bw_5C_avg) + geom_point(aes(x=datetime_combined, y=mean_flux))  + 
+  geom_line(aes(x=datetime_combined, y=mean_flux)) + xlab("Date") + ylab("CO2 flux")  + ylim(1,8)
+
+ggplot(data=bw_control_avg) + geom_point(aes(x=datetime_combined, y=mean_flux))  + geom_line(aes(x=datetime_combined, y=mean_flux)) + xlab("Date") + ylab("CO2 flux")  + ylim(1,8)
+
+#ggplot(data=bw_heated_avg_2003) + geom_line(aes(x=datetime_combined, y=mean_flux))  + xlab("Date") + ylab("CO2 flux")  + ylim(1,8)
+
+
+```
+
+Bind rows so I can plot the two graphs into plot
+
+```{r }
+both_plots <- bind_cols(bw_control_avg, bw_5C_avg) 
+both_plots <- both_plots %>% rename(datetime_combined = datetime_combined...1, Control = mean_flux...2, Treatment = mean_flux...4)
+both_plots <- both_plots[, !(names(both_plots) %in% c('datetime_combined...3'))]
+
+
+both_plots_longer <- both_plots %>% reshape2::melt(id = "datetime_combined") 
+View(both_plots_longer)
+
+ggplot(data=both_plots_longer, aes(x= datetime_combined, y=value, color = variable)) + geom_line() + geom_point()  +
+    xlab("Date") + 
+    ylab("CO2 flux, μmol/(m²·s) ")  + 
+    ylim(1,8) + 
+    labs(color = "Plot Type") 
+
+```
+
+**\# (optional if there's time): Exploratory time series analysis on the treatment plot.**
+
+```{r}
+
+treatment_plots_longer_tsi <- both_plots_longer %>%  group_by(variable = "Treatment")
+treatment_plots_longer_tsi <- both_plots_longer %>% select(c(datetime_combined = "datetime_combined", value = "value"))
+
+
+## Because there were duplicate observations in one day, I had to take the mean of the observations each day to be able to do the time series analysis.
+
+
+# Convert datetime_combined to Date to extract the day
+treatment_plots_longer_tsi <- treatment_plots_longer_tsi %>%
+  mutate(day = as.Date(datetime_combined))
+
+# Group by day and calculate the mean for each day
+daily_means_treatment <- treatment_plots_longer_tsi %>%
+  group_by(day) %>%
+  summarize(mean_value = mean(value))
+
+dmeans_treatment_tsi <- daily_means_treatment %>% as_tsibble()
+
+
+
+ggplot(data= dmeans_treatment_tsi, aes(x=day, y=mean_value)) + geom_line() + geom_point() + xlab("Date") + ylab("average daily carbon flux from treatment plot") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%Y-%m-%d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+After I adjust for seasonality, then can I do the comparison?
+
+```{r include=FALSE}
+
+
+#decomposition_result <- dmeans_treatment_tsi %>% model(classical_decomposition(mean_value, type = "additive")) %>%
+#components() %>% 
+#  autoplot()
+
+  #%>%  model(classical_decomposition(value, type = "additive")) %>% 
+#  components() %>% 
+#  autoplot() + 
+#  labs(title = "Time Series Analysis of Male Lung Disease Deaths in the UK")
+
+
+```
+
+# **Exploratory** data analysis (no time component)
+
+Can we visually assess a difference in carbon flux between the control and treated plots in this study?
+
+## Plotting the data as is:
+
+```{r}
+
+study_data <- both_plots_longer %>% group_by(variable) %>% select(c("variable", "value")) 
+
+study_data %>% ggplot(aes(x=variable, y=value, color = variable)) + geom_point() + labs(color = "Plot type") + xlab("Plot type") + ylab("Carbon Flux, μmol/(m²·s)") 
+
+
+```
+
+Running the summary() function on control and treatment observations:
+
+```{r}
+summary(study_data$value[study_data$variable == "Control"])
+
+```
+
+```{r}
+
+summary(study_data$value[study_data$variable == "Treatment"])
+```
+
+The summary statistics reveal that
+
+## Plotting the data with a violin-plot (upgraded box-plot)
+
+```{r}
+
+study_data %>% ggplot(aes(x=variable, y=value)) + geom_violin(alpha=0.3,  aes(fill = variable))  + geom_boxplot(width=0.1, aes(fill = variable)) +   stat_summary(fun=mean, geom="point", shape=23, size=3)+
+  labs(fill = "Study Plot") + 
+  xlab("Plot type") + 
+  ylab("CO2 flux, μmol/(m²·s)") 
+
+
+
+```
+
+# Single variable, Categorical OLS
+
+```{r}
+
+simple_lm <- lm(value ~ variable, data = both_plots_longer)
+
+print(summary(simple_lm))
+
+```
+
+-   **Interpretation:** The coefficient represents the estimated difference in the mean carbon flux value between the Treatment and Control groups. However, since the p-value is greater than 0.05, we fail to reject the null hypothesis that there is no difference.
+
+-   **Residual standard error:** 1.416
+
+    -   This is a measure of the variability of the residuals.
+
+-   **Multiple R-squared:** 0.005801
+
+    -   This indicates the proportion of variance in the response variable explained by the model. In this case, it's very low.
+
+-   **Adjusted R-squared:** -0.004776
+
+    -   Similar to R-squared but adjusted for the number of predictors. Negative values may indicate that the model is not a good fit.
+
+-   **F-statistic:** 0.5484 on 1 and 94 DF
+
+    -   This tests the overall significance of the model. The p-value (0.4608) suggests that the model is not statistically significant.
+
+Finding a suitable model: more variables/ interaction terms.
+
+## Just adding a time component (no interaction effects)
+
+```{r}
+both_plots_longer$month <- format(both_plots_longer$datetime_combined, "%m")
+lm_month <- lm(value ~ variable + month, data = both_plots_longer)
+summary(lm_month)
+
+```
+
+## Assuming interaction effects
+
+```{r, echo=TRUE, results='markup'}
+both_plots_longer$month <- format(both_plots_longer$datetime_combined, "%m")
+lm_interaction_month <- lm(value ~ variable + month + variable:month, data = both_plots_longer)
+
+print(summary(lm_interaction_month))
+
+```
+
+\
+The results are interesting! Four months: May, June, July, August, and September, had heating effects. This makes intuitive sense, as these months are summer months. An interesting case arises in this study, since winter months should also have effects in the negative direction, however, winter months here are actually simulated observations based on another model, and not real observations, since the study couldn't actually take measurements during those winter months as the plot was covered in snow.
+
+```         
+Coefficients:
+                          Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                1.26037    0.23938   5.265 1.15e-06 ***
+variableTreatment          0.40833    0.33853   1.206 0.231297    
+
+month05                    1.36241    0.37849   3.600 0.000551 ***
+month06                    1.80991    0.31667   5.716 1.81e-07 ***
+month07                    4.30241    0.33853  12.709  < 2e-16 ***
+month08                    3.10500    0.33853   9.172 4.03e-14 ***
+month09                    1.43685    0.33853   4.244 5.86e-05 ***
+month10                    0.80370    0.33853   2.374 0.019988 *  
+```
+
+## How does the simple linear regression compare to the multiple linear regression?
+
+```         
+Simple Linear regression:                                   Adjusted R-squared: -0.004776 
+Multiple Linear regression:                                 Adjusted R-squared:  0.8278
+Multiple Linear regression with interaction effect (month): Adjusted R-squared:  0.8278 
+```
+
+Overall the adjust R-squares of the multiple linear regression models (with and/or without interaction effects) which take into account a time variable seem to yield a much better result than the simple linear regression. The incorporation of an interaction effect makes negligible difference in the model, so I've chosen to omit it in choosing the most suitable model for this experiment.
+
+The Q-Q plot of this graph suggests that .......
+
+# Evaluating the best model (Single variable categorical with time component:
+
+## Step 1: Evaluating OLS assumptions
+
+**1) Population parameters are linear, with additive disturbance**
+
+-   We can assume that the parameters enter linearly; in this case, I'm assuming that small increases in temperature will cause a proportional increase in soil respiration on a local level. **(CITE LITERATURE).**
+
+**2) Our X variable is exogenous**
+
+We can't test for this, but with the addition of the time variable, we have significantly improved the simple linear regression and therefore reduced further possibility of omitted variable bias
+
+**3) X variable has variation**
+
+The carbon flux data indeed show a wide range of results.
+
+**4)** The population disturbance u is independently and identically distributed as a normal random variable with mean 0 and variance sigma squared
+
+```{r}
+
+# check if the residuals are evenly distributed + add a horizontal line at 0 
+plot(lm_month$residual)+abline(0,0)
+
+```
+
+```{r}
+#Create density plot of residuals
+sd <- sd(lm_month$residuals)
+sd
+ 
+plot(density(lm_month$residual), col = "coral", lwd = 4,  main="rnorm vs. residual, u=0, sd = 0.56") 
+
+lines(density(rnorm(1000000, mean= 0, sd = sd)), lty = "dotted" , lwd = 2, col = "darkgrey") 
+
+
+legend(x = "topleft", box.col = "grey", 
+        box.lwd = 2 , title="EQUATIONS",  
+       legend=c("rnorm", "residual"),  
+       fill = c("grey","coral")) 
+```
+
+```{r}
+
+## The second plot is the Q-Q residuals graph. Again, we can verify that it largely follows the normal distribution, save points at the lowest and highest quantiles. 
+plot(lm_month)
+
+```
+
+# Cool, so this model follows OLS assumptions. Finally, what does it tell us?
+
+```{r}
+
+summary(lm_month)
+```
+
+1.  **Intercept (1.3575):**
+
+    -   The estimated intercept of 1.3575 represents the baseline soil carbon flux when the treatment variable (**`variableTreatment`**) is zero, which likely corresponds to the control group. In other words, when no treatment is applied (control group), the estimated soil carbon flux is 1.3575.
+
+2.  **Variable Treatment (0.2141):**
+
+    -   The variable **`variableTreatment`** represents the effect of the heat-applied treatment compared to the control group. The estimated coefficient of 0.2141 suggests that, on average, the soil carbon flux is expected to increase by 0.2141 units when the heat-applied treatment is applied compared to the control group. However, this coefficient has a p-value of 0.07715, which is larger than the conventional significance level of 0.05. While it's not statistically significant at the 0.05 level, it's still worth noting since it is quite close to that level.
+
+3.  **Monthly Effects (month05, month06, \..., month11):**
+
+    -   The coefficients for each month (e.g., **`month05`**, **`month06`**, etc.) indicate the expected change in soil carbon flux compared to the baseline month. For example, **`month05`** has a coefficient of 1.4546, suggesting that in May, on average, the soil carbon flux is expected to increase by 1.4546 units compared to the baseline month. This makes sense, because these months are summer months.
+
+4.  **Overall Model Significance (F-statistic):**
+
+    -   The F-statistic tests the overall significance of the model, including all the predictors. In your case, the F-statistic is 58.07, and the associated p-value is very close to zero (\< 2.2e-16), indicating that the model, including both treatment and monthly effects, is statistically significant.
+
+5.  **R-squared (0.8423) and Adjusted R-squared (0.8278):**
+
+    -   The R-squared value of 0.8423 indicates that approximately 84.23% of the variability in soil carbon flux is explained by the model. The Adjusted R-squared accounts for the number of predictors in the model and is 0.8278, suggesting a good fit.
+
+6.  **Residual Standard Error (0.5865):**
+
+    -   The residual standard error is an estimate of the variability of the residuals. In this model, it is 0.5865, providing a measure of the spread of the observed soil carbon flux values around the predicted values.
+
+In summary, the model suggests that, on average, the soil carbon flux is influenced by both the treatment (heat-applied vs. control) and the month of the year. The overall model is statistically significant, and the R-squared value indicates a good fit. The interpretation of the treatment variable is subject to the p-value associated with it (0.07715), and additional considerations may be needed depending on the context and objectives of the study.
